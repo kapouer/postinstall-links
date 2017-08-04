@@ -50,8 +50,8 @@ function processLink(key, destPath) {
 			destDir = Path.dirname(destPath);
 		}
 
-		if (!isRooted(srcPath)) throw new Error("Cannot symlink from file outside cwd:\n" + srcPath);
-		if (!isRooted(destPath)) throw new Error("Cannot symlink to file outside cwd:\n" + destPath);
+		assertRooted(modulePath, srcPath);
+		assertRooted(process.cwd(), destPath);
 
 		return fs.exists(srcPath).then(function(yes) {
 			if (!yes) throw new Error(`Cannot find ${srcPath}`);
@@ -72,6 +72,8 @@ function processLink(key, destPath) {
 	});
 }
 
-function isRooted(path) {
-	return Path.resolve(path).startsWith(process.cwd());
+function assertRooted(root, path) {
+	if (!Path.resolve(path).startsWith(root)) {
+		throw new Error(`path is not in root:\n ${root}\n ${path}`);
+	}
 }
