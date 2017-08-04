@@ -1,0 +1,25 @@
+{
+  "name": "postinstall-links",
+  "version": "1.0.0",
+  "description": "Create links to files in dependencies at npm postinstall",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kapouer/postinstall-links.git"
+  },
+  "keywords": [
+    "postinstall",
+    "npm",
+    "links",
+    "assets"
+  ],
+  "author": "Jérémy Lal <kapouer@melix.org>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kapouer/postinstall-links/issues"
+  },
+  "homepage": "https://github.com/kapouer/postinstall-links#readme"
+}
