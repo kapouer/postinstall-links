@@ -14,15 +14,21 @@ In package.json:
   },
   dependencies: {
     "postinstall-links": "^1",
-    "jquery": "^3"
+    "jquery": "^3",
+    "flickity": "^2"
   },
   links: {
-    "jquery/jquery.slim.min.js": "public/",
-    "jquery/jquery.js": "public/jquery.dev.js"
+    "jquery/dist/jquery.slim.min.js": "public/",
+    "jquery/dist/jquery.js": "public/jquery.dev.js",
+    "flickity/dist/*": "public/flickity/"
   }
 
 ```
 
-Note that `require.resolve('jquery')` resolves to `node_modules/jquery/dist/`
-so it's not necessary to put `dist/` in the path.
+* the first component of a link source path is the module name, it is replaced
+by the resolved path of the module directory.
+
+* the link source path can end with a (glob-compatible) wildcard, in which case
+all matched files are symlinked. In this case the destination path must end with
+a slash.
 

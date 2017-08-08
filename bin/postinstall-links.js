@@ -1,6 +1,7 @@
 #!/usr/bin/node
 
 var pify = require('pify');
+var glob = pify(require('glob'));
 var mkdirp = pify(require('mkdirp'));
 var fs = require("fs");
 fs = {
@@ -9,8 +10,7 @@ fs = {
 	lstat: pify(fs.lstat),
 	stat: pify(fs.stat),
 	unlink: pify(fs.unlink),
-	symlink: pify(fs.symlink),
-	readdir: pify(fs.readdir)
+	symlink: pify(fs.symlink)
 };
 var Path = require('path');
 
@@ -39,7 +39,7 @@ function processKeyVal(key, destPath) {
 	}
 	modulePath = findModuleRoot(modulePath, module);
 	var srcFile = list.pop();
-	var srcPath = Path.join(modulePath, list.join('/'));
+	var srcPath = Path.join(modulePath, list.join('/'), srcFile);
 	assertRooted(modulePath, srcPath);
 	var destDir, destFile;
 	if (destPath.endsWith('/')) {
@@ -56,13 +56,17 @@ function processKeyVal(key, destPath) {
 				console.error("Wildcard symlinks only works with a destination directory", key, destPath);
 				return;
 			}
-			return fs.readdir(srcPath).then(function(paths) {
+			return glob(srcPath, {
+				nosort: true,
+				nobrace: true,
+				noglobstar: true
+			}).then(function(paths) {
 				return Promise.all(paths.map(function(onePath) {
-					return makeLink(Path.join(srcPath, onePath), Path.join(destDir, Path.basename(onePath)));
+					return makeLink(onePath, Path.join(destDir, Path.basename(onePath)));
 				}));
 			});
 		} else {
-			return makeLink(Path.join(srcPath, srcFile), destFile);
+			return makeLink(srcPath, destFile);
 		}
 	});
 }
