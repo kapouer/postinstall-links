@@ -9,7 +9,8 @@ fs = {
 	lstat: pify(fs.lstat),
 	stat: pify(fs.stat),
 	unlink: pify(fs.unlink),
-	symlink: pify(fs.symlink)
+	symlink: pify(fs.symlink),
+	readdir: pify(fs.readdir)
 };
 var Path = require('path');
 
@@ -19,13 +20,13 @@ fs.readFile('package.json').then(function(data) {
 		throw new Error(`No links field in ${process.cwd}package.json`);
 	}
 	return Promise.all(Object.keys(obj.links).map(function(key) {
-		return processLink(key, obj.links[key]);
+		return processKeyVal(key, obj.links[key]);
 	}));
 }).catch(function(err) {
 	console.error(err);
 });
 
-function processLink(key, destPath) {
+function processKeyVal(key, destPath) {
 	var list = key.split('/');
 	// deal with @owner/name modules
 	var module = list.splice(0, list[0].startsWith('@') ? 2 : 1).join('/');
@@ -37,32 +38,42 @@ function processLink(key, destPath) {
 		return;
 	}
 	modulePath = findModuleRoot(modulePath, module);
+	var srcFile = list.pop();
 	var srcPath = Path.join(modulePath, list.join('/'));
-
-	var destDir;
+	assertRooted(modulePath, srcPath);
+	var destDir, destFile;
 	if (destPath.endsWith('/')) {
 		destDir = destPath;
-		destPath = destPath + list.pop();
+		destFile = destPath + srcFile;
 	} else {
 		destDir = Path.dirname(destPath);
+		destFile = destPath;
 	}
+	assertRooted(process.cwd(), destDir);
+	return mkdirp(destDir).then(function() {
+		if (srcFile == "*") {
+			if (!destPath.endsWith('/')) {
+				console.error("Wildcard symlinks only works with a destination directory", key, destPath);
+				return;
+			}
+			return fs.readdir(srcPath).then(function(paths) {
+				return Promise.all(paths.map(function(onePath) {
+					return makeLink(Path.join(srcPath, onePath), Path.join(destDir, Path.basename(onePath)));
+				}));
+			});
+		} else {
+			return makeLink(Path.join(srcPath, srcFile), destFile);
+		}
+	});
+}
 
-	assertRooted(modulePath, srcPath);
-	assertRooted(process.cwd(), destPath);
-
+function makeLink(srcPath, destPath) {
 	return fs.exists(srcPath).then(function(yes) {
 		if (!yes) throw new Error(`Cannot find ${srcPath}`);
 	}).then(function() {
 		return fs.lstat(destPath).then(function(stats) {
-			if (stats.isSymbolicLink()) return fs.unlink(destPath).then(function() {
-				return true;
-			});
-			else return true;
-		}).catch(function(err) {
-			return false;
-		});
-	}).then(function(exists) {
-		if (!exists) return mkdirp(destDir);
+			if (stats.isSymbolicLink()) return fs.unlink(destPath);
+		}).catch(function() {});
 	}).then(function() {
 		return fs.symlink(srcPath, destPath);
 	});
