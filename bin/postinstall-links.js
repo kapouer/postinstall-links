@@ -36,39 +36,35 @@ function processLink(key, destPath) {
 		console.error("Unknown module", module);
 		return;
 	}
-	return fs.stat(modulePath).then(function(stats) {
-		if (stats.isFile()) return Path.dirname(modulePath);
-		else return modulePath;
-	}).then(function(modulePath) {
-		var srcPath = Path.join(modulePath, list.join('/'));
+	modulePath = findModuleRoot(modulePath, module);
+	var srcPath = Path.join(modulePath, list.join('/'));
 
-		var destDir;
-		if (destPath.endsWith('/')) {
-			destDir = destPath;
-			destPath = destPath + list.pop();
-		} else {
-			destDir = Path.dirname(destPath);
-		}
+	var destDir;
+	if (destPath.endsWith('/')) {
+		destDir = destPath;
+		destPath = destPath + list.pop();
+	} else {
+		destDir = Path.dirname(destPath);
+	}
 
-		assertRooted(modulePath, srcPath);
-		assertRooted(process.cwd(), destPath);
+	assertRooted(modulePath, srcPath);
+	assertRooted(process.cwd(), destPath);
 
-		return fs.exists(srcPath).then(function(yes) {
-			if (!yes) throw new Error(`Cannot find ${srcPath}`);
-		}).then(function() {
-			return fs.lstat(destPath).then(function(stats) {
-				if (stats.isSymbolicLink()) return fs.unlink(destPath).then(function() {
-					return true;
-				});
-				else return true;
-			}).catch(function(err) {
-				return false;
+	return fs.exists(srcPath).then(function(yes) {
+		if (!yes) throw new Error(`Cannot find ${srcPath}`);
+	}).then(function() {
+		return fs.lstat(destPath).then(function(stats) {
+			if (stats.isSymbolicLink()) return fs.unlink(destPath).then(function() {
+				return true;
 			});
-		}).then(function(exists) {
-			if (!exists) return mkdirp(destDir);
-		}).then(function() {
-			return fs.symlink(srcPath, destPath);
+			else return true;
+		}).catch(function(err) {
+			return false;
 		});
+	}).then(function(exists) {
+		if (!exists) return mkdirp(destDir);
+	}).then(function() {
+		return fs.symlink(srcPath, destPath);
 	});
 }
 
@@ -76,4 +72,9 @@ function assertRooted(root, path) {
 	if (!Path.resolve(path).startsWith(root)) {
 		throw new Error(`path is not in root:\n ${root}\n ${path}`);
 	}
+}
+
+function findModuleRoot(resolvedPath, moduleName) {
+	if (resolvedPath.endsWith(moduleName)) return resolvedPath;
+	else return findModuleRoot(Path.dirname(resolvedPath), moduleName);
 }
