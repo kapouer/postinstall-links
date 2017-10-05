@@ -90,6 +90,12 @@ function assertRooted(root, path) {
 }
 
 function findModuleRoot(resolvedPath, moduleName) {
-	if (resolvedPath.endsWith(moduleName)) return resolvedPath;
-	else return findModuleRoot(Path.dirname(resolvedPath), moduleName);
+	moduleName = moduleName.split('/').pop();
+	if (resolvedPath.endsWith(moduleName)) {
+		return resolvedPath;
+	} else {
+		var dir = Path.dirname(resolvedPath);
+		if (dir == resolvedPath) throw new Error("Cannot find module root: " + moduleName);
+		return findModuleRoot(dir, moduleName);
+	}
 }
