@@ -31,13 +31,17 @@ function processKeyVal(key, destPath) {
 	// deal with @owner/name modules
 	var module = list.splice(0, list[0].startsWith('@') ? 2 : 1).join('/');
 	var modulePath;
-	try {
-		modulePath = require.resolve(module);
-	} catch(ex) {
-		console.error("Unknown module", module);
-		return;
+	if (module == ".") {
+		modulePath = process.cwd();
+	} else {
+		try {
+			modulePath = require.resolve(module);
+		} catch(ex) {
+			console.error("Unknown module", module);
+			return;
+		}
+		modulePath = findModuleRoot(modulePath, module);
 	}
-	modulePath = findModuleRoot(modulePath, module);
 	var srcFile = list.pop();
 	var srcPath = Path.join(modulePath, list.join('/'), srcFile);
 	assertRooted(modulePath, srcPath);
