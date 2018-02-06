@@ -1,0 +1,12 @@
+{
+  "name": "local",
+  "scripts": {
+    "postinstall": "postinstall-links"
+  },
+  "links": {
+    "./src.js": "dst.js"
+  },
+  "dependencies": {
+    "postinstall": "../../../"
+  }
+}
