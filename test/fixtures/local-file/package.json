@@ -1,5 +1,5 @@
 {
-  "name": "local",
+  "name": "local-file",
   "scripts": {
     "postinstall": "postinstall-links"
   },

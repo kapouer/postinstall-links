@@ -10,8 +10,14 @@ describe("Root config", function suite() {
 
 	});
 
-	it("should install local links", function() {
-		return common.cmd("local", "install").then(function({dir, pkg}) {
+	it("should install local file link", function() {
+		return common.cmd("local-file", "install").then(function({dir, pkg}) {
+			return common.checkLinks(dir, pkg);
+		});
+	});
+
+	it("should install dependency file link", function() {
+		return common.cmd("dep-file", "install").then(function({dir, pkg}) {
 			return common.checkLinks(dir, pkg);
 		});
 	});
