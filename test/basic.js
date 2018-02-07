@@ -1,7 +1,7 @@
 var common = require('./common');
 
 
-describe("Root config", function suite() {
+describe("Basic tests", function suite() {
 	before(function() {
 		return common.prepare();
 	});
@@ -24,6 +24,12 @@ describe("Root config", function suite() {
 
 	it("should install scoped dependency file link", function() {
 		return common.cmd("scoped-dep-file", "install").then(function({dir, pkg}) {
+			return common.checkLinks(dir, pkg);
+		});
+	});
+
+	it("should install dependency wildcard link", function() {
+		return common.cmd("dep-wildcard", "install").then(function({dir, pkg}) {
 			return common.checkLinks(dir, pkg);
 		});
 	});

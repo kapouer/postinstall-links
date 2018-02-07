@@ -1,0 +1,13 @@
+{
+  "name": "dep-wildcard",
+  "scripts": {
+    "postinstall": "postinstall-links"
+  },
+  "links": {
+    "sample/dist/*": "public/"
+  },
+  "dependencies": {
+    "postinstall": "../../../",
+    "sample": "file:../sample"
+  }
+}
