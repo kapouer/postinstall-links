@@ -22,4 +22,10 @@ describe("Root config", function suite() {
 		});
 	});
 
+	it("should install scoped dependency file link", function() {
+		return common.cmd("scoped-dep-file", "install").then(function({dir, pkg}) {
+			return common.checkLinks(dir, pkg);
+		});
+	});
+
 });

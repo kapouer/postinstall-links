@@ -1,0 +1,13 @@
+{
+  "name": "scoped-dep-file",
+  "scripts": {
+    "postinstall": "postinstall-links"
+  },
+  "links": {
+    "@scope/sample/dist/test.js": "test.js"
+  },
+  "dependencies": {
+    "postinstall": "../../../",
+    "@scope/sample": "file:../@scope/sample"
+  }
+}

@@ -3,6 +3,8 @@
 var pify = require('pify');
 var glob = pify(require('glob'));
 var mkdirp = pify(require('mkdirp'));
+var resolvePkg = require('resolve-pkg');
+
 var fs = require("fs");
 fs = {
 	readFile: pify(fs.readFile),
@@ -17,7 +19,7 @@ var Path = require('path');
 fs.readFile('package.json').then(function(data) {
 	var obj = JSON.parse(data);
 	if (!obj.links) {
-		throw new Error(`No links field in ${process.cwd}package.json`);
+		throw new Error(`No links field in ${Path.join(process.cwd(), 'package.json')}`);
 	}
 	return Promise.all(Object.keys(obj.links).map(function(key) {
 		return processKeyVal(key, obj.links[key]);
@@ -27,32 +29,17 @@ fs.readFile('package.json').then(function(data) {
 });
 
 function processKeyVal(key, destPath) {
-	var list = key.split('/');
-	// deal with @owner/name modules
-	var module = list.splice(0, list[0].startsWith('@') ? 2 : 1).join('/');
-	var modulePath;
-	if (module == ".") {
-		modulePath = process.cwd();
-	} else {
-		try {
-			modulePath = require.resolve(module);
-		} catch(ex) {
-			console.error("Unknown module", module);
-			return;
-		}
-		modulePath = findModuleRoot(modulePath, module);
-	}
-	var srcFile = list.pop();
-	var srcPath = Path.join(modulePath, list.join('/'), srcFile);
-	assertRooted(modulePath, srcPath);
+	var srcPath = resolvePkg(key) || Path.resolve(key);
+	var srcFile = Path.basename(srcPath);
 	var destDir, destFile;
 	if (destPath.endsWith('/')) {
 		destDir = destPath;
-		destFile = destPath + srcFile;
+		destFile = Path.join(destPath, srcFile);
 	} else {
 		destDir = Path.dirname(destPath);
 		destFile = destPath;
 	}
+
 	assertRooted(process.cwd(), destDir);
 	return mkdirp(destDir).then(function() {
 		if (srcFile == "*") {
