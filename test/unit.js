@@ -1,7 +1,8 @@
 var common = require('./common');
 
 
-describe("Basic tests", function suite() {
+describe("Unit tests", function suite() {
+	this.timeout(10000);
 	before(function() {
 		return common.prepare();
 	});
@@ -31,6 +32,16 @@ describe("Basic tests", function suite() {
 	it("should install dependency wildcard link", function() {
 		return common.cmd("dep-wildcard", "install").then(function({dir, pkg}) {
 			return common.checkLinks(dir, pkg);
+		});
+	});
+
+	it("should install dependency file installed within dependency", function() {
+		return common.cmd("dep-dep-file", "install").then(function({dir, pkg}) {
+			return common.checkLinks(dir, pkg);
+		}).then(function() {
+			return common.cmd("dep-dep-file", "update").then(function({dir, pkg}) {
+				return common.checkLinks(dir, pkg);
+			});
 		});
 	});
 

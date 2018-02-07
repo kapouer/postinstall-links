@@ -7,7 +7,7 @@
     "sample/dist/*": "public/"
   },
   "dependencies": {
-    "postinstall": "../../../",
+    "postinstall-links": "../../../",
     "sample": "file:../sample"
   }
 }

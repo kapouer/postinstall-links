@@ -7,6 +7,6 @@
     "./src.js": "dst.js"
   },
   "dependencies": {
-    "postinstall": "../../../"
+    "postinstall-links": "../../../"
   }
 }
