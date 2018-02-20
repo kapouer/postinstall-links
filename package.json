@@ -1,6 +1,6 @@
 {
   "name": "postinstall-links",
-  "version": "0.3.1",
+  "version": "0.3.99",
   "description": "Create links to files in dependencies at npm postinstall",
   "main": "index.js",
   "scripts": {
